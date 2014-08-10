@@ -1,0 +1,9 @@
+Package: ws.hbang.writingaletter
+Name: WritingALetter
+Depends: mobilesubstrate, firmware (>= 7.0)
+Version: 1.0
+Architecture: iphoneos-arm
+Description: Would you like help?
+Maintainer: HASHBANG Productions <support@hbang.ws>
+Author: HASHBANG Productions <support@hbang.ws>
+Section: Toys
