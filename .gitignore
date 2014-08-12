@@ -1,9 +1,33 @@
+# theos
 *.deb
 _
 obj
 *.o
 theos
+.theos
+
+# misc
 *~
 *.save
 .DS_Store
-.theos
+
+# xcode
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xcworkspace
+!default.xcworkspace
+xcuserdata
+profile
+*.moved-aside
+DerivedData
+.idea/
+
+# agent package directory is ignored because the file size is massive
+agents

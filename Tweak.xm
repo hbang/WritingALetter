@@ -6,6 +6,7 @@
 #import <UIKit/_UIModalItemTableViewCell.h>
 #import <UIKit/UIImage+Private.h>
 
+/*
 NSBundle *bundle;
 
 static const char *kHBWLTriangleBackdropViewIdentifier;
@@ -134,9 +135,51 @@ static const char *kHBWLAssistantViewIdentifier;
 }
 
 %end
+*/
+
+#import "HBWLAgentView.h"
+#import <UIKit/UIWindow+Private.h>
+
+UIWindow *agentWindow;
+HBWLAgentView *agentView;
+
+%hook SpringBoard
+
+- (void)applicationDidFinishLaunching:(UIApplication *)application {
+	%orig;
+
+	agentWindow = [[UIWindow alloc] init];
+	agentWindow.windowLevel = UIWindowLevelAlert - 1.f;
+	agentWindow.userInteractionEnabled = NO;
+	agentWindow.hidden = NO;
+
+	agentView = [[HBWLAgentView alloc] initWithFrame:CGRectMake(196.f, 464.f, 0, 0)];
+	agentView.userInteractionEnabled = NO;
+	[agentWindow addSubview:agentView];
+}
+
+%end
+
+%hook SBLockScreenViewController
+
+- (void)_handleDisplayTurnedOn4 {
+	%orig;
+	[agentView playAnimation:@"Greeting"];
+}
+
+%end
+
+%hook _UIModalItemsPresentingViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+	%orig;
+	[agentView playAnimation:@"GetAttention"];
+}
+
+%end
 
 #pragma mark - Constructor
 
 %ctor {
-	bundle = [[NSBundle bundleWithPath:@"/Library/PreferenceBundles/WritingALetter.bundle"] retain];
+
 }
