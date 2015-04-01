@@ -8,7 +8,7 @@
 @property (nonatomic, retain) UIImage *image;
 @property (nonatomic, retain) NSString *sound;
 
-// TOOD: branching
-// @property NSUInteger exitBranch;
+@property NSUInteger exitBranch;
+@property (nonatomic, retain) NSArray *branching;
 
 @end

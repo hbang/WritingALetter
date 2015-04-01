@@ -6,18 +6,24 @@ static NSString *const kHBWLAgentsLocation = @"file:///Library/WritingALetter/Ag
 
 @implementation HBWLAgentView {
 	HBWLAgent *_agent;
+	NSTimer *_idleTimer;
+
 	BOOL _isAnimating;
+	HBWLAgentAnimationPlayCompletion _completion;
 }
 
-- (instancetype)initWithFrame:(CGRect)frame {
-	self = [super initWithFrame:frame];
+- (instancetype)init {
+	self = [super init];
 
 	if (self) {
-		UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playRandomAnimation)];
-		gestureRecognizer.numberOfTapsRequired = 2;
-		[self addGestureRecognizer:gestureRecognizer];
+		self.alpha = 0.75f;
 
-		[self loadAgentName:@"Clippit"];
+		UIPanGestureRecognizer *panGestureRecognizer = [[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureRecognizerFired:)] autorelease];
+		[self addGestureRecognizer:panGestureRecognizer];
+
+		UITapGestureRecognizer *tapGestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playRandomAnimation)] autorelease];
+		tapGestureRecognizer.numberOfTapsRequired = 2;
+		[self addGestureRecognizer:tapGestureRecognizer];
 	}
 
 	return self;
@@ -54,16 +60,20 @@ static NSString *const kHBWLAgentsLocation = @"file:///Library/WritingALetter/Ag
 }
 
 - (void)loadAgentName:(NSString *)name {
+	[self loadAgentName:name animated:NO];
+}
+
+- (void)loadAgentName:(NSString *)name animated:(BOOL)animated {
 #ifdef WritingALetterTest_PrefixHeader_pch
 	NSBundle *bundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:name withExtension:@"bundle" subdirectory:@"agents"]];
 #else
-	NSBundle *bundle = [NSBundle bundleWithURL:[NSURL URLWithString:[[kHBWLAgentsLocation stringByAppendingPathComponent:name] stringByAppendingPathExtension:@"bundle"]]];
+	NSBundle *bundle = [NSBundle bundleWithURL:[[[NSURL URLWithString:kHBWLAgentsLocation] URLByAppendingPathComponent:name] URLByAppendingPathExtension:@"bundle"]];
 #endif
 
 	HBWLAgent *agent = [[HBWLAgent alloc] initWithBundle:bundle];
 
 	if (agent) {
-		self.agent = agent;
+		[self setAgent:agent animated:YES];
 	} else {
 		NSLog(@"WritingALetter: agent %@ not found", name);
 	}
@@ -75,8 +85,8 @@ static NSString *const kHBWLAgentsLocation = @"file:///Library/WritingALetter/Ag
 	[self playAnimation:animation completion:nil];
 }
 
-- (void)playAnimation:(NSString *)animation completion:(void(^)())completion {
-	NSArray *frames = _agent.animations[animation];
+- (void)playAnimation:(NSString *)animation completion:(HBWLAgentAnimationPlayCompletion)completion {
+	NSArray *frames = [_agent framesForAnimation:animation];
 
 	if (!frames) {
 		NSLog(@"WritingALetter: no animation %@ for %@", animation, _agent.name);
@@ -125,10 +135,45 @@ static NSString *const kHBWLAgentsLocation = @"file:///Library/WritingALetter/Ag
 		_isAnimating = YES;
 	}
 
-	// TODO: completion block
+	if (completion) {
+		_completion = [completion copy];
+	}
 }
 
 - (void)playRandomAnimation {
+	NSString *animation;
+
+	do {
+		animation = _agent.animations.allKeys[arc4random_uniform(_agent.animations.allKeys.count)];
+	} while ([animation hasPrefix:@"Idle"]);
+
+	[self playAnimation:animation];
+}
+
+- (void)_playSoundFired:(NSTimer *)timer {
+	[_agent playSound:timer.userInfo];
+}
+
+#pragma mark - Idle timer
+
+- (void)_resetIdleTimer {
+	if (_isAnimating) {
+		return;
+	}
+
+	if (_idleTimer) {
+		[_idleTimer invalidate];
+		[_idleTimer release];
+	}
+
+	_idleTimer = [[NSTimer scheduledTimerWithTimeInterval:10 + arc4random_uniform(30) target:self selector:@selector(_idleTimerFired) userInfo:nil repeats:NO] retain];
+}
+
+- (void)_idleTimerFired {
+	if (_isAnimating) {
+		return;
+	}
+
 	NSString *animation;
 
 	do {
@@ -138,14 +183,51 @@ static NSString *const kHBWLAgentsLocation = @"file:///Library/WritingALetter/Ag
 	[self playAnimation:animation];
 }
 
-- (void)_playSoundFired:(NSTimer *)timer {
-	[_agent playSound:timer.userInfo];
-}
-
 #pragma mark - CAAnimationDelegate
 
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)finished {
 	_isAnimating = NO;
+
+	if (_completion) {
+		_completion();
+		[_completion release];
+	}
+
+	[self _resetIdleTimer];
+}
+
+#pragma mark - Gesture recogniser
+
+- (void)panGestureRecognizerFired:(UIPanGestureRecognizer *)gestureRecognizer {
+	switch (gestureRecognizer.state) {
+		case UIGestureRecognizerStateBegan:
+		{
+			[UIView animateWithDuration:0.2 animations:^{
+				self.alpha = 1;
+				self.transform = CGAffineTransformMakeScale(1.2f, 1.2f);
+			}];
+			break;
+		}
+
+		case UIGestureRecognizerStateChanged:
+		{
+			self.center = [gestureRecognizer locationInView:self.superview];
+			break;
+		}
+
+		case UIGestureRecognizerStateEnded:
+		case UIGestureRecognizerStateCancelled:
+		{
+			[UIView animateWithDuration:0.2 animations:^{
+				self.alpha = 0.75f;
+				self.transform = CGAffineTransformMakeScale(1, 1);
+			}];
+			break;
+		}
+
+		default:
+			break;
+	}
 }
 
 #pragma mark - Memory management
