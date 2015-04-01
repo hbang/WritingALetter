@@ -162,7 +162,7 @@ HBWLAgentView *agentView;
 
 %hook SBLockScreenViewController
 
-- (void)_handleDisplayTurnedOn4 {
+- (void)_handleDisplayTurnedOn {
 	%orig;
 	[agentView playAnimation:@"Greeting"];
 }

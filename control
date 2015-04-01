@@ -1,6 +1,6 @@
 Package: ws.hbang.writingaletter
 Name: WritingALetter
-Depends: mobilesubstrate, firmware (>= 7.0)
+Depends: mobilesubstrate, ws.hbang.writingaletter.agents, firmware (>= 7.0)
 Version: 1.1
 Architecture: iphoneos-arm
 Description: Would you like help?

@@ -6,12 +6,17 @@ static NSString *const kHBWLAgentsLocation = @"file:///Library/WritingALetter/Ag
 
 @implementation HBWLAgentView {
 	HBWLAgent *_agent;
+	BOOL _isAnimating;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
 	self = [super initWithFrame:frame];
 
 	if (self) {
+		UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playRandomAnimation)];
+		gestureRecognizer.numberOfTapsRequired = 2;
+		[self addGestureRecognizer:gestureRecognizer];
+
 		[self loadAgentName:@"Clippit"];
 	}
 
@@ -107,6 +112,7 @@ static NSString *const kHBWLAgentsLocation = @"file:///Library/WritingALetter/Ag
 	[keyTimes addObject:@1];
 
 	CAKeyframeAnimation *keyframeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"contents"];
+	keyframeAnimation.delegate = self;
 	keyframeAnimation.values = values;
 	keyframeAnimation.keyTimes = keyTimes;
 	keyframeAnimation.duration = totalDuration;
@@ -115,11 +121,31 @@ static NSString *const kHBWLAgentsLocation = @"file:///Library/WritingALetter/Ag
 	keyframeAnimation.removedOnCompletion = NO;
 	[self.layer addAnimation:keyframeAnimation forKey:nil];
 
+	if (![animation hasPrefix:@"Idle"]) {
+		_isAnimating = YES;
+	}
+
 	// TODO: completion block
+}
+
+- (void)playRandomAnimation {
+	NSString *animation;
+
+	do {
+		animation = _agent.animations.allKeys[arc4random_uniform(_agent.animations.allKeys.count)];
+	} while (![animation hasPrefix:@"Idle"]);
+
+	[self playAnimation:animation];
 }
 
 - (void)_playSoundFired:(NSTimer *)timer {
 	[_agent playSound:timer.userInfo];
+}
+
+#pragma mark - CAAnimationDelegate
+
+- (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)finished {
+	_isAnimating = NO;
 }
 
 #pragma mark - Memory management
