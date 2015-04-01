@@ -1,6 +1,7 @@
 #import "HBWLAgentView.h"
 #import "HBWLAgent.h"
 #import "HBWLFrame.h"
+#import <Foundation/NSDistributedNotificationCenter.h>
 
 @implementation HBWLAgentView {
 	HBWLAgent *_agent;
@@ -22,6 +23,8 @@
 		UITapGestureRecognizer *tapGestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playRandomAnimation)] autorelease];
 		tapGestureRecognizer.numberOfTapsRequired = 2;
 		[self addGestureRecognizer:tapGestureRecognizer];
+
+		[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedAnimationNotification:) name:HBWLPlayAnimationNotification object:nil];
 	}
 
 	return self;
@@ -71,7 +74,7 @@
 	HBWLAgent *agent = [[HBWLAgent alloc] initWithBundle:bundle];
 
 	if (agent) {
-		[self setAgent:agent animated:YES];
+		[self setAgent:agent animated:animated];
 	} else {
 		NSLog(@"WritingALetter: agent %@ not found", name);
 	}
@@ -228,10 +231,20 @@
 	}
 }
 
+#pragma mark - Notification
+
+- (void)receivedAnimationNotification:(NSNotification *)notification {
+	[self playAnimation:notification.userInfo[kHBWLAnimationNameKey]];
+}
+
 #pragma mark - Memory management
 
 - (void)dealloc {
 	[_agent release];
+	[_idleTimer release];
+
+	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
+
 	[super dealloc];
 }
 

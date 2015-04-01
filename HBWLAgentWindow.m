@@ -15,12 +15,6 @@
 		}
 
 		_agentView = [[HBWLAgentView alloc] init];
-
-		CGRect agentFrame = _agentView.frame;
-		agentFrame.origin.x = self.frame.size.width - _agentView.frame.size.width - 40.f;
-		agentFrame.origin.y = self.frame.size.height - _agentView.frame.size.height - 40.f;
-		_agentView.frame = agentFrame;
-
 		[self addSubview:_agentView];
 	}
 

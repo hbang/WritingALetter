@@ -1,10 +1,14 @@
 include theos/makefiles/common.mk
 
-TWEAK_NAME = WritingALetter
+TWEAK_NAME = WritingALetter WritingALetterHooks
+
 WritingALetter_FILES = Tweak.xm $(wildcard *.m)
 WritingALetter_FRAMEWORKS = AudioToolbox CoreGraphics QuartzCore UIKit
 WritingALetter_LIBRARIES = cephei
 WritingALetter_CFLAGS = -include Global.h
+
+WritingALetterHooks_FILES = AppHooks.xm
+WritingALetterHooks_CFLAGS = -include Global.h
 
 # SUBPROJECTS = prefs
 
