@@ -10,6 +10,8 @@
 	<string>ws.hbang.writingaletter</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>WritingALetter</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
@@ -20,9 +22,11 @@
 	<string>1.0</string>
 	<key>DTPlatformName</key>
 	<string>iphoneos</string>
+	<key>HBPackageIdentifier</key>
+	<string>ws.hbang.writingaletter</string>
 	<key>MinimumOSVersion</key>
 	<string>3.0</string>
 	<key>NSPrincipalClass</key>
-	<string>WritingALetterListController</string>
+	<string>HBWLRootListController</string>
 </dict>
 </plist>

@@ -2,8 +2,6 @@
 #import "HBWLAgent.h"
 #import "HBWLFrame.h"
 
-static NSString *const kHBWLAgentsLocation = @"file:///Library/WritingALetter/Agents";
-
 @implementation HBWLAgentView {
 	HBWLAgent *_agent;
 	NSTimer *_idleTimer;

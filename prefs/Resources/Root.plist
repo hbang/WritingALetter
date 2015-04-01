@@ -7,16 +7,16 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<key>label</key>
-			<string>Assistant</string>
 		</dict>
 		<dict>
-			<key>cellClass</key>
-			<string>HBWLAgentPickerTableCell</string>
 			<key>cell</key>
 			<string>PSLinkCell</string>
+			<key>label</key>
+			<string>Assistant</string>
+			<key>detail</key>
+			<string>HBWLAgentPickerListController</string>
 			<key>default</key>
-			<true/>
+			<string>Clippit</string>
 			<key>defaults</key>
 			<string>ws.hbang.writingaletter</string>
 			<key>PostNotification</key>
